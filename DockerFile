@@ -1,0 +1,15 @@
+FROM mcr.microsoft.com/dotnet/core/sdk:2.2 AS build
+WORKDIR /app
+
+COPY *.sln .
+COPY NetCoreSampleApi/*.csproj ./NetCoreSampleApi/
+RUN dotnet restore
+
+COPY NetCoreSampleApi/. ./NetCoreSampleApi/
+WORKDIR /app/NetCoreSampleApi
+RUN dotnet publish -c Release -o out
+
+FROM mcr.microsoft.com/dotnet/core/aspnet:2.2 AS runtime
+WORKDIR /app
+COPY --from=build /app/NetCoreSampleApi/out ./
+ENTRYPOINT ["dotnet", "NetCoreSampleApi.dll"]
